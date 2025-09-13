@@ -1,6 +1,5 @@
 ﻿// MainWindow.xaml.cs
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace MixItControllerApp
@@ -9,27 +8,23 @@ namespace MixItControllerApp
     {
         public MainWindow()
         {
-            // Panggilan ini harus ada, jangan dihapus atau dibuat manual
             InitializeComponent();
-            
             DataContext = new MainViewModel();
         }
 
-        // Method ini harus ada untuk menangani event dari XAML
         private void Slider_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is MainViewModel vm)
             {
-                vm.PausePolling();
+                vm.SetIsDragging(true);
             }
         }
 
-        // Method ini juga harus ada untuk menangani event dari XAML
-        private async void Slider_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void Slider_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (DataContext is MainViewModel vm && sender is Slider slider && slider.DataContext is MixerChannel channel)
+            if (DataContext is MainViewModel vm)
             {
-                await vm.EndUiInteraction(channel);
+                vm.SetIsDragging(false);
             }
         }
     }

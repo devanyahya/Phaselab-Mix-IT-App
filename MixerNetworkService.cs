@@ -1,4 +1,4 @@
-// MixerNetworkService.cs (EFFICIENT POLLING)
+// MixerNetworkService.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,8 +29,6 @@ public class MixerNetworkService
             await _client.ConnectAsync(ipAddress, port);
             _stream = _client.GetStream();
             _cts = new CancellationTokenSource();
-            
-            // Hanya jalankan task untuk mendengarkan data
             _ = Task.Run(() => ListenForData(_cts.Token), _cts.Token);
             return true;
         }

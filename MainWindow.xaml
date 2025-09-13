@@ -10,8 +10,6 @@
     <Window.Resources>
         <Style x:Key="VerticalSlider" TargetType="Slider">
             <Setter Property="Orientation" Value="Vertical"/>
-            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="Slider_PreviewMouseLeftButtonDown"/>
-            <EventSetter Event="PreviewMouseLeftButtonUp" Handler="Slider_PreviewMouseLeftButtonUp"/>
         </Style>
         <Style x:Key="VerticalProgressBar" TargetType="ProgressBar">
             <Setter Property="Orientation" Value="Vertical"/>
@@ -53,7 +51,9 @@
                     <DataTemplate>
                         <Grid Margin="5">
                             <ProgressBar Style="{StaticResource VerticalProgressBar}" Minimum="0" Maximum="100" Value="{Binding MeterLevel}" Background="#FF4B4B4B" Foreground="LimeGreen" BorderThickness="0"/>
-                            <Slider Style="{StaticResource VerticalSlider}" Minimum="0" Maximum="255" Value="{Binding GainByte, Mode=TwoWay}" LargeChange="10" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                            <Slider Style="{StaticResource VerticalSlider}" Minimum="0" Maximum="255" Value="{Binding GainByte, Mode=TwoWay}" LargeChange="10" TickFrequency="1" IsSnapToTickEnabled="True"
+                                    PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"
+                                    PreviewMouseLeftButtonUp="Slider_PreviewMouseLeftButtonUp"/>
                             <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center">
                                 <TextBlock Text="{Binding GainDbText}" Foreground="White" HorizontalAlignment="Center" Margin="0,5"/>
                                 <ToggleButton IsChecked="{Binding IsMuted, Mode=OneWay}" Content="MUTE" Command="{Binding DataContext.MuteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" FontWeight="Bold">
@@ -79,7 +79,9 @@
 
             <Grid Grid.Column="2" DataContext="{Binding LrChannel}">
                 <ProgressBar Style="{StaticResource VerticalProgressBar}" Minimum="0" Maximum="100" Value="{Binding MeterLevel}" Background="#FF4B4B4B" Foreground="LimeGreen" BorderThickness="0"/>
-                <Slider Style="{StaticResource VerticalSlider}" Minimum="0" Maximum="255" Value="{Binding GainByte, Mode=TwoWay}" LargeChange="10" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                <Slider Style="{StaticResource VerticalSlider}" Minimum="0" Maximum="255" Value="{Binding GainByte, Mode=TwoWay}" LargeChange="10" TickFrequency="1" IsSnapToTickEnabled="True"
+                        PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"
+                        PreviewMouseLeftButtonUp="Slider_PreviewMouseLeftButtonUp"/>
                 <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding GainDbText}" Foreground="White" HorizontalAlignment="Center" Margin="0,5"/>
                     <ToggleButton IsChecked="{Binding IsMuted, Mode=OneWay}" Content="MUTE" Command="{Binding DataContext.MuteCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" FontWeight="Bold">
