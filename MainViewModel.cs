@@ -1,4 +1,4 @@
-// MainViewModel.cs (FINAL STABLE & REFINED)
+// MainViewModel.cs (FINAL CLEANED VERSION)
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,8 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
 
 public class MainViewModel : INotifyPropertyChanged
 {
@@ -21,15 +19,11 @@ public class MainViewModel : INotifyPropertyChanged
     private bool _isDraggingSlider = false;
     private CancellationTokenSource _pollingCts = new CancellationTokenSource();
     private int _pollingChannelIndex = 0;
-    
-    // Timer untuk indikator dibuat sekali saja
-    private readonly DispatcherTimer _indicatorTimer;
 
     private string _mixerIpAddress = "172.16.24.3";
     private string _connectionStatus = "Disconnected";
     private bool _isConnected;
     private Preset? _selectedPreset;
-    private Brush _dataReceivedIndicatorBrush = Brushes.Gray;
 
     public ObservableCollection<MixerChannel> DisplayChannels { get; } = new ObservableCollection<MixerChannel>();
     public MixerChannel LrChannel { get; private set; }
@@ -39,8 +33,6 @@ public class MainViewModel : INotifyPropertyChanged
     public string ConnectionStatus { get => _connectionStatus; set { _connectionStatus = value; OnPropertyChanged(); } }
     public bool IsConnected { get => _isConnected; set { _isConnected = value; OnPropertyChanged(); } }
     public Preset? SelectedPreset { get => _selectedPreset; set { _selectedPreset = value; OnPropertyChanged(); } }
-    
-    public Brush DataReceivedIndicatorBrush { get => _dataReceivedIndicatorBrush; set { _dataReceivedIndicatorBrush = value; OnPropertyChanged(); } }
     
     public ICommand ConnectCommand { get; }
     public ICommand ChangeLayerCommand { get; }
@@ -56,14 +48,10 @@ public class MainViewModel : INotifyPropertyChanged
     public MainViewModel()
     {
         _mixerService = new MixerNetworkService();
-        _mixerService.OnPacketReceived += () => Application.Current.Dispatcher.Invoke(FlashIndicator);
         _mixerService.OnMeterDataReceived += (data) => Application.Current.Dispatcher.Invoke(() => OnMeterDataReceived(data));
         _mixerService.OnGainReceived += (id, val) => Application.Current.Dispatcher.Invoke(() => OnGainReceived(id, val));
         _mixerService.OnMuteStatusReceived += (id, val) => Application.Current.Dispatcher.Invoke(() => OnMuteStatusReceived(id, val));
         _mixerService.OnPresetReceived += (id) => Application.Current.Dispatcher.Invoke(() => OnPresetReceived(id));
-        
-        _indicatorTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-        _indicatorTimer.Tick += (s, e) => { if (s is DispatcherTimer t) { DataReceivedIndicatorBrush = Brushes.Gray; t.Stop(); } };
 
         InitializeChannels();
         _meterChannelOrder = CreateMeterChannelOrder();
@@ -102,15 +90,6 @@ public class MainViewModel : INotifyPropertyChanged
             }
             
             await Task.Delay(1, token);
-        }
-    }
-    
-    private void FlashIndicator()
-    {
-        if (!_indicatorTimer.IsEnabled)
-        {
-            DataReceivedIndicatorBrush = Brushes.LimeGreen;
-            _indicatorTimer.Start();
         }
     }
 
