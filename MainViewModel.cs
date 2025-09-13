@@ -1,4 +1,4 @@
-// MainViewModel.cs (STABLE BASELINE VERSION)
+// MainViewModel.cs (FINAL STABLE & REFINED)
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,6 +21,9 @@ public class MainViewModel : INotifyPropertyChanged
     private bool _isDraggingSlider = false;
     private CancellationTokenSource _pollingCts = new CancellationTokenSource();
     private int _pollingChannelIndex = 0;
+    
+    // Timer untuk indikator dibuat sekali saja
+    private readonly DispatcherTimer _indicatorTimer;
 
     private string _mixerIpAddress = "172.16.24.3";
     private string _connectionStatus = "Disconnected";
@@ -59,6 +62,9 @@ public class MainViewModel : INotifyPropertyChanged
         _mixerService.OnMuteStatusReceived += (id, val) => Application.Current.Dispatcher.Invoke(() => OnMuteStatusReceived(id, val));
         _mixerService.OnPresetReceived += (id) => Application.Current.Dispatcher.Invoke(() => OnPresetReceived(id));
         
+        _indicatorTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+        _indicatorTimer.Tick += (s, e) => { if (s is DispatcherTimer t) { DataReceivedIndicatorBrush = Brushes.Gray; t.Stop(); } };
+
         InitializeChannels();
         _meterChannelOrder = CreateMeterChannelOrder();
         InitializePresets();
@@ -80,10 +86,8 @@ public class MainViewModel : INotifyPropertyChanged
             await _commandGate.WaitAsync(token);
             try
             {
-                // Selalu minta data meter
                 await _mixerService.RequestMeterDataAsync();
 
-                // Minta status untuk SATU channel secara bergiliran (round-robin)
                 if (_allChannels.TryGetValue(_pollingChannelIndex, out var channelToPoll))
                 {
                     await _mixerService.RequestGainAsync(channelToPoll.ChannelId);
@@ -97,17 +101,17 @@ public class MainViewModel : INotifyPropertyChanged
                 _commandGate.Release();
             }
             
-            // Jeda antar siklus polling per channel
-            await Task.Delay(1, token); 
+            await Task.Delay(1, token);
         }
     }
     
     private void FlashIndicator()
     {
-        DataReceivedIndicatorBrush = Brushes.LimeGreen;
-        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-        timer.Tick += (s, e) => { if (s is DispatcherTimer t) { DataReceivedIndicatorBrush = Brushes.Gray; t.Stop(); } };
-        timer.Start();
+        if (!_indicatorTimer.IsEnabled)
+        {
+            DataReceivedIndicatorBrush = Brushes.LimeGreen;
+            _indicatorTimer.Start();
+        }
     }
 
     private void InitializeChannels()
